@@ -1,18 +1,24 @@
-<table class="table" data-test="urls">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>URL</th>
-            <th>Дата создания</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for url in urls %}
-        <tr>
-            <td>{{ url.id }}</td>
-            <td><a href="{{ url_for('url_detail', id=url.id) }}">{{ url.name }}</a></td>
-            <td>{{ url.created_at }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+{% extends "sample.html" %}
+
+{% block main %}
+<main class="flex-grow-1">
+    <table class="table" data-test="urls">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>URL</th>
+                <th>Дата создания</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for url in urls %}
+            <tr>
+                <td>{{ url.id }}</td>
+                <td><a href="{{ url_for('url_detail', id=url.id) }}">{{ url.name }}</a></td>
+                <td>{{ url.created_at }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</main>
+{% endblock %}
