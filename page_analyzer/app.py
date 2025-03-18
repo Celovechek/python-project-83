@@ -9,7 +9,7 @@ from page_analyzer import db
 load_dotenv()
 
 app = Flask(__name__)
-SECRET_KEY = os.getenv('SECRET_KEY')
+app.secret_key = os.getenv('SECRET_KEY')
 DATABASE_URL = os.getenv('DATABASE_URL')
 
 
