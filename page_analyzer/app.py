@@ -5,6 +5,8 @@ import os
 from dotenv import load_dotenv
 import validators
 from page_analyzer import db
+import requests
+from requests.exceptions import SSLError, RequestException
 
 load_dotenv()
 
@@ -68,21 +70,28 @@ def show_urls():
 
 @app.post('/urls/<id>/checks')
 def checks(id):
-    conn = db.create_connection(DATABASE_URL)
-    # url = db.get_url(conn, id)
+    try:
+        conn = db.create_connection(DATABASE_URL)
+        url = db.get_url(conn, id)
+        response = requests.get(url.get('name'), timeout=5)
 
-    check_data = {
-        'url_id': id,
-        'status_code': 200,
-        'h1': '',
-        'title': '',
-        'description': ''
-    }
+        check_data = {
+            'url_id': id,
+            'status_code': response.status_code,
+            'h1': '',
+            'title': '',
+            'description': ''
+        }
 
-    flash('Страница успешно проверена', 'success')
+        flash('Страница успешно проверена', 'success')
 
-    db.add_url_check(conn, check_data)
-    db.close(conn)
+        db.add_url_check(conn, check_data)
+    except SSLError as e:
+        flash(f'Ошибка SSL: {str(e)}', 'danger')
+    except RequestException as e:
+        flash(f'Ошибка при выполнении запроса: {str(e)}', 'danger')
+    finally:
+        db.close(conn)
 
     return redirect(url_for('show_url', id=id), 302)
 
