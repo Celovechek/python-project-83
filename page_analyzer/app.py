@@ -34,7 +34,7 @@ def index():
         url = db.get_url_by_name(conn, normalized_url)
         if url:
             flash('URL уже существует', 'info')
-            id = url.id
+            id = url.get('id')
         else:
             id = db.add_url(conn, normalized_url)
             db.close(conn)
@@ -48,13 +48,14 @@ def index():
 def show_url(id):
     conn = db.create_connection(DATABASE_URL)
     url = db.get_url(conn, id)
+    checks = db.get_checks_by_url(conn, id)
     db.close(conn)
 
     if not url:
         flash('Запись не найдена', 'danger')
         return redirect(url_for('index'))
 
-    return render_template('show_url.html', url=url)
+    return render_template('show_url.html', url=url, checks=checks)
 
 
 @app.route('/urls')
@@ -63,6 +64,27 @@ def show_urls():
     urls = db.get_urls(conn)
     db.close(conn)
     return render_template('urls.html', urls=urls)
+
+
+@app.post('/urls/<id>/checks')
+def checks(id):
+    conn = db.create_connection(DATABASE_URL)
+    # url = db.get_url(conn, id)
+
+    check_data = {
+        'url_id': id,
+        'status_code': 200,
+        'h1': '',
+        'title': '',
+        'description': ''
+    }
+
+    flash('Страница успешно проверена', 'success')
+
+    db.add_url_check(conn, check_data)
+    db.close(conn)
+
+    return redirect(url_for('show_url', id=id), 302)
 
 
 def validate_url(url: str):
