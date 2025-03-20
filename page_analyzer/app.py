@@ -7,6 +7,7 @@ import validators
 from page_analyzer import db
 import requests
 from requests.exceptions import SSLError, RequestException
+from bs4 import BeautifulSoup
 
 load_dotenv()
 
@@ -75,12 +76,18 @@ def checks(id):
         url = db.get_url(conn, id)
         response = requests.get(url.get('name'), timeout=5)
 
+        soup = BeautifulSoup(response.text, 'html.parser')
+        h1 = soup.h1.string if soup.h1 else ''
+        title = soup.title.string if soup.title else ''
+        description = soup.find(attrs={"name": "description"})
+        description = description['content'] if description else ''
+
         check_data = {
             'url_id': id,
             'status_code': response.status_code,
-            'h1': '',
-            'title': '',
-            'description': ''
+            'h1': h1,
+            'title': title,
+            'description': description
         }
 
         flash('Страница успешно проверена', 'success')
