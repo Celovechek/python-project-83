@@ -6,8 +6,9 @@
         <thead>
             <tr>
                 <th>ID</th>
-                <th>URL</th>
-                <th>Дата создания</th>
+                <th>Имя</th>
+                <th>Последняя проверка</th>
+                <th>Код ответа</th>
             </tr>
         </thead>
         <tbody>
@@ -15,7 +16,8 @@
             <tr>
                 <td>{{ url.id }}</td>
                 <td><a href="{{ url_for('show_url', id=url.id) }}">{{ url.name }}</a></td>
-                <td>{{ url.created_at }}</td>
+                <td>{{ checks.get(url.id).created_at }}</td>
+                <td>{{ checks.get(url.id).status_code }}</td>
             </tr>
             {% endfor %}
         </tbody>

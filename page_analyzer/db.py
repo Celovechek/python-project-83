@@ -4,27 +4,25 @@ from datetime import datetime
 
 
 def close(conn):
+    """Закрывает подключение к базе данных"""
     conn.close()
 
 
-def create_connection(DATABASE_URL):
-    return psycopg2.connect(DATABASE_URL)
+def connect(database_url):
+    """Создает подключение к базе данных"""
+    return psycopg2.connect(database_url)
 
 
-def get_url_by_name(conn, url):
+def find_url_with_name(conn, url: str) -> dict:
+    """Ищет url в БД по ссылке"""
     with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-
-        cur.execute("""
-            SELECT * FROM urls
-            WHERE name = %s;
-            """,
-                    (url, ))
+        cur.execute("SELECT * FROM urls WHERE name = %s;", (url, ))
         url = cur.fetchone()
-
     return url
 
 
-def add_url(conn, url):
+def add_url(conn, url: str) -> int:
+    """Добавляет url в БД и возвращает id"""
     with conn.cursor() as cur:
         cur.execute(
             "INSERT INTO urls (name, created_at) VALUES (%s, %s) RETURNING id",
@@ -35,21 +33,24 @@ def add_url(conn, url):
     return id
 
 
-def get_url(conn, id):
+def find_url(conn, id: int) -> dict:
+    """Ищет url в БД по id"""
     with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
         cur.execute("SELECT * FROM urls WHERE id = %s", (id,))
         url = cur.fetchone()
     return url
 
 
-def get_urls(conn):
+def find_urls(conn):
+    """Выводит список словарей со всеми сайтами, которые находятся в БД"""
     with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
         cur.execute("SELECT * FROM urls ORDER BY created_at DESC")
         urls = cur.fetchall()
     return urls
 
 
-def add_url_check(conn, check_data):
+def add_url_check(conn, check_data: dict) -> None:
+    """Добавляет информацию о проверке в таблицу url_checks"""
     with conn.cursor() as cur:
         cur.execute("""
             INSERT INTO url_checks (
@@ -71,13 +72,12 @@ def add_url_check(conn, check_data):
         conn.commit()
 
 
-def get_checks_by_url(conn, url_id):
+def find_url_checks(conn, url_id: int) -> dict:
+    """Ищет информацию о провероках url по id в таблице url_checks"""
     with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-        cur.execute("""SELECT * FROM url_checks
-                       WHERE url_id = %s
+        cur.execute("""SELECT * FROM url_checks WHERE url_id = %s
                        ORDER BY created_at DESC;""",
                     (url_id, )
                     )
         checks = cur.fetchall()
-
     return checks

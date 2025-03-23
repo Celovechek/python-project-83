@@ -33,25 +33,27 @@ def index():
                 'index.html',
                 messages=messages,
             ), 422
-        conn = db.create_connection(DATABASE_URL)
-        url = db.get_url_by_name(conn, normalized_url)
+
+        conn = db.connect(DATABASE_URL)
+        url = db.find_url_with_name(conn, normalized_url)
         if url:
             flash('URL уже существует', 'info')
             id = url.get('id')
         else:
             id = db.add_url(conn, normalized_url)
             db.close(conn)
-
             flash('Страница успешно добавлена', 'success')
+
         return redirect(url_for('show_url', id=id))
+
     return render_template('index.html')
 
 
 @app.route('/urls/<int:id>')
 def show_url(id):
-    conn = db.create_connection(DATABASE_URL)
-    url = db.get_url(conn, id)
-    checks = db.get_checks_by_url(conn, id)
+    conn = db.connect(DATABASE_URL)
+    url = db.find_url(conn, id)
+    checks = db.find_url_checks(conn, id)
     db.close(conn)
 
     if not url:
@@ -63,17 +65,26 @@ def show_url(id):
 
 @app.route('/urls')
 def show_urls():
-    conn = db.create_connection(DATABASE_URL)
-    urls = db.get_urls(conn)
+    conn = db.connect(DATABASE_URL)
+    urls = db.find_urls(conn)
+    checks_dict = {}
+    for url in urls:
+        try:
+            checks_dict.update({url["id"]: db.find_url_checks(conn,
+                                                              url["id"])[0]})
+        except IndexError:
+            checks_dict.update({'url_id': url["id"],
+                                'status_code': '',
+                                'created_at': ''})
     db.close(conn)
-    return render_template('urls.html', urls=urls)
+    return render_template('urls.html', urls=urls, checks=checks_dict)
 
 
 @app.post('/urls/<id>/checks')
 def checks(id):
     try:
-        conn = db.create_connection(DATABASE_URL)
-        url = db.get_url(conn, id)
+        conn = db.connect(DATABASE_URL)
+        url = db.find_url(conn, id)
         response = requests.get(url.get('name'), timeout=5)
 
         soup = BeautifulSoup(response.text, 'html.parser')
@@ -81,7 +92,6 @@ def checks(id):
         title = soup.title.string if soup.title else ''
         description = soup.find(attrs={"name": "description"})
         description = description['content'] if description else ''
-
         check_data = {
             'url_id': id,
             'status_code': response.status_code,
