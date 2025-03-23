@@ -3,3 +3,6 @@
 
 ## Деплой
 Приложение доступно по адресу: https://page-analyzer-5sqs.onrender.com
+
+## Команда для клонирования
+```git clone git@github.com:Celovechek/python-project-83.git```
