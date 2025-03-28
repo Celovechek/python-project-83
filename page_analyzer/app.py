@@ -38,7 +38,7 @@ def index():
         conn = db.connect(DATABASE_URL)
         url = db.find_url_with_name(conn, normalized_url)
         if url:
-            flash('URL уже существует', 'info')
+            flash('Страница уже существует', 'info')
             id = url.get('id')
         else:
             id = db.add_url(conn, normalized_url)
