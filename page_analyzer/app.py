@@ -106,7 +106,7 @@ def checks(id):
         db.add_url_check(conn, check_data)
     except SSLError as e:
         flash(f'Ошибка SSL: {str(e)}', 'danger')
-    except RequestException as e:
+    except RequestException:
         flash('Произошла ошибка при проверке', 'danger')
     finally:
         db.close(conn)
