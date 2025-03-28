@@ -107,7 +107,7 @@ def checks(id):
     except SSLError as e:
         flash(f'Ошибка SSL: {str(e)}', 'danger')
     except RequestException as e:
-        flash(f'Ошибка при выполнении запроса: {str(e)}', 'danger')
+        flash('Произошла ошибка при проверке', 'danger')
     finally:
         db.close(conn)
 
