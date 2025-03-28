@@ -4,7 +4,6 @@ from datetime import datetime
 
 
 def close(conn):
-    """Закрывает подключение к базе данных"""
     conn.close()
 
 
