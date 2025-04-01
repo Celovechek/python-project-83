@@ -17,8 +17,13 @@ DATABASE_URL = os.getenv('DATABASE_URL')
 conn = db.connect(DATABASE_URL)
 
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/')
 def index():
+    return render_template('index.html')
+
+
+@app.route('/urls', methods=['GET', 'POST'])
+def show_urls():
     if request.method == 'POST':
         raw_url = request.form['url']
 
@@ -46,8 +51,19 @@ def index():
             flash('Страница успешно добавлена', 'success')
 
         return redirect(url_for('show_url', id=id))
-
-    return render_template('index.html')
+    conn = db.connect(DATABASE_URL)
+    urls = db.find_urls(conn)
+    checks_dict = {}
+    for url in urls:
+        try:
+            checks_dict.update({url["id"]: db.find_url_checks(conn,
+                                                              url["id"])[0]})
+        except IndexError:
+            checks_dict.update({'url_id': url["id"],
+                                'status_code': '',
+                                'created_at': ''})
+    db.close(conn)
+    return render_template('urls.html', urls=urls, checks=checks_dict)
 
 
 @app.route('/urls/<int:id>')
@@ -62,23 +78,6 @@ def show_url(id):
         return redirect(url_for('index'))
 
     return render_template('show_url.html', url=url, checks=checks)
-
-
-@app.route('/urls')
-def show_urls():
-    conn = db.connect(DATABASE_URL)
-    urls = db.find_urls(conn)
-    checks_dict = {}
-    for url in urls:
-        try:
-            checks_dict.update({url["id"]: db.find_url_checks(conn,
-                                                              url["id"])[0]})
-        except IndexError:
-            checks_dict.update({'url_id': url["id"],
-                                'status_code': '',
-                                'created_at': ''})
-    db.close(conn)
-    return render_template('urls.html', urls=urls, checks=checks_dict)
 
 
 @app.post('/urls/<id>/checks')
