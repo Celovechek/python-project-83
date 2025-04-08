@@ -84,7 +84,9 @@ def show_url(id):
         check['created_at'] = check['created_at'].date()
         new_checks.append(check)
 
-    return render_template('show_url.html', url=url, checks=new_checks)
+    messages = get_flashed_messages(with_categories=True)
+
+    return render_template('show_url.html', url=url, messages=messages, checks=new_checks)
 
 
 @app.post('/urls/<int:id>/checks')
@@ -93,6 +95,7 @@ def checks(id):
         conn = db.connect(DATABASE_URL)
         url = db.find_url(conn, id)
         response = requests.get(url.get('name'), timeout=5)
+        response.raise_for_status()
 
         soup = BeautifulSoup(response.text, 'html.parser')
         h1 = soup.h1.string if soup.h1 else ''
