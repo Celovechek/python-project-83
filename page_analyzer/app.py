@@ -56,8 +56,9 @@ def show_urls():
     checks_dict = {}
     for url in urls:
         try:
-            checks_dict.update({url["id"]: db.find_url_checks(conn,
-                                                              url["id"])[0]})
+            last_check = db.find_url_checks(conn, url["id"])[0]
+            last_check['created_at'] = last_check['created_at'].date()
+            checks_dict.update({url["id"]: last_check})
         except IndexError:
             checks_dict.update({'url_id': url["id"],
                                 'status_code': '',
@@ -77,7 +78,12 @@ def show_url(id):
         flash('Запись не найдена', 'danger')
         return redirect(url_for('index'))
 
-    return render_template('show_url.html', url=url, checks=checks)
+    new_checks = []
+    for check in checks:
+        check['created_at'] = check['created_at'].date()
+        new_checks.append(check)
+
+    return render_template('show_url.html', url=url, checks=new_checks)
 
 
 @app.post('/urls/<id>/checks')
@@ -103,10 +109,8 @@ def checks(id):
         flash('Страница успешно проверена', 'success')
 
         db.add_url_check(conn, check_data)
-    except SSLError as e:
-        flash(f'Ошибка SSL: {str(e)}', 'danger')
-    except RequestException:
-        flash('Произошла ошибка при проверке', 'danger')
+    except Exception:
+        flash(f'Произошла ошибка при проверке', 'danger')
     finally:
         db.close(conn)
 
