@@ -77,6 +77,8 @@ def show_url(id):
         flash('Запись не найдена', 'danger')
         return redirect(url_for('index'))
 
+    url["created_at"] = url["created_at"].date()
+
     new_checks = []
     for check in checks:
         check['created_at'] = check['created_at'].date()
@@ -85,7 +87,7 @@ def show_url(id):
     return render_template('show_url.html', url=url, checks=new_checks)
 
 
-@app.post('/urls/<id>/checks')
+@app.post('/urls/<int:id>/checks')
 def checks(id):
     try:
         conn = db.connect(DATABASE_URL)
