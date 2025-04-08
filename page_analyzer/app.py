@@ -6,7 +6,6 @@ from dotenv import load_dotenv
 import validators
 from page_analyzer import db
 import requests
-from requests.exceptions import SSLError, RequestException
 from bs4 import BeautifulSoup
 
 load_dotenv()
@@ -110,7 +109,7 @@ def checks(id):
 
         db.add_url_check(conn, check_data)
     except Exception:
-        flash(f'Произошла ошибка при проверке', 'danger')
+        flash('Произошла ошибка при проверке', 'danger')
     finally:
         db.close(conn)
 
