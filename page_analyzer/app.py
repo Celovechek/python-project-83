@@ -86,7 +86,10 @@ def show_url(id):
 
     messages = get_flashed_messages(with_categories=True)
 
-    return render_template('show_url.html', url=url, messages=messages, checks=new_checks)
+    return render_template('show_url.html',
+                           url=url,
+                           messages=messages,
+                           checks=new_checks)
 
 
 @app.post('/urls/<int:id>/checks')
